@@ -21,8 +21,8 @@ using Claude AI, and sends back a structured code review report
 ## Tech Stack
 
 - n8n (workflow automation)
-- Ollama — for all 3 LLM steps
-- Gmail — trigger + send
+- Ollama - for all 3 LLM steps
+- Gmail - trigger + send
 - No paid third-party LLM service needed beyond Claude API
 
 ## Nodes Used
