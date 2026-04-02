@@ -1,0 +1,366 @@
+{
+  "name": "Code Summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "vishvachaudhary3101@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -864,
+        -32
+      ],
+      "id": "dca74548-e675-4280-8cfe-807b5f7f2bd9",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1FNclub955oHH3a",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -16
+      ],
+      "id": "c883284f-f58a-4a3b-a8c2-4df33c42c607",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "P4vqojvsnF61K4VF",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The following is an email I received. It contains code that needs to be analyzed.\n\nSender: {{ $json.from.value[0].address }}\nSubject: {{ $json.subject }}\n\nEmail Content:\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an expert code reviewer and technical documentation writer. \nYour job is to analyze code shared via email and produce a clear, \nstructured summary that helps the reader quickly understand what the \ncode does without reading every line.\n\nWhen given code , always return your summary in this format:\n\n**Purpose:** What this code does in 1-2 sentences.\n\n**Language & Key Technologies:** Programming language, frameworks, libraries used.\n\n**How It Works (Step-by-step):** A numbered breakdown of the main logic flow.\n\n**Key Functions / Components:** List the important functions, classes, or modules and what each one does.\n\n**Inputs & Outputs:** What does the code expect as input? What does it produce or return?\n\n**Potential Issues or Improvements:** Any obvious bugs, security concerns, or suggestions (keep it brief).\n\nBe concise but thorough. Assume the reader is a developer who needs a quick orientation."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -640,
+        -224
+      ],
+      "id": "6ff07265-55cd-48a6-8649-0d0cae41ae43",
+      "name": "Code Summarizer"
+    },
+    {
+      "parameters": {
+        "model": "llama3:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        336
+      ],
+      "id": "39934353-479e-4ab7-b9f3-73a7d18801cf",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "P4vqojvsnF61K4VF",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "3c17928e-6cc6-4de2-ade9-09f96561eab4",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "34c9aee0-baf1-4ea6-b15b-db8e3f1e56f9",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "model": "llama3:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        368,
+        160
+      ],
+      "id": "f82bc2f3-0989-4a74-a5c9-e373ad3da6ed",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "P4vqojvsnF61K4VF",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the code from the email I received. \nPlease add comments to it without changing any line:\n\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an expert code documentation assistant. Your only job is to \nadd helpful, clear comments to code without modifying any logic, \nstructure, or syntax of the original code.\n\nFollow these rules STRICTLY:\n- Do NOT change any line of code — not even whitespace or formatting\n- Do NOT refactor, optimize, or fix anything\n- Do NOT remove any existing comments\n- Only ADD inline comments or block comments above functions/sections\n- Comments should explain WHY and WHAT, not just restate the code\n- Use the correct comment syntax for the detected programming language\n  (// for JS/Java/C, # for Python, -- for SQL, etc.)\n- If the code language is unclear, default to // style comments\n- Return ONLY the commented code — no explanations, no markdown \n  headers, no \"Here is your code\" preamble\n- Do not wrap output in markdown code blocks unless the input had them"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -640,
+        144
+      ],
+      "id": "cbbb9de1-0a13-4765-8fdc-e4ba9f076cc7",
+      "name": "Code Commentor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2b0be86-562e-49a2-97f1-3222aca4d839",
+              "name": "data[0].text",
+              "value": "=Code Summary:\n\n{{ $json.data[0].text }}\n\nCode:\n\n{{ $json.data[1].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "8db09a41-cf12-461a-9e1d-7cf24b2eac45",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "vishva.chaudhary@probusinsurance.com",
+        "subject": "=Code Overview ",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        -64
+      ],
+      "id": "effe59f4-9820-4de6-b066-1ab423da3df1",
+      "name": "Send a message",
+      "webhookId": "28c6d1b6-b48e-472a-b9d2-83a9c80879ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1FNclub955oHH3a",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Draft a professional HTML email using the following two inputs:\n\n--- CODE SUMMARY ---\n--- CODE WITH COMMENTS ---\n{{ $json.data[0].text }}\n\nThe email should have:\n1. A subject line suggestion at the top (styled as a small label, not an actual subject field)\n2. A short intro line like \"Please find below the code review for the received submission.\"\n3. A clearly separated section for the Code Summary with a heading\n4. A clearly separated section for the Code with Comments with a heading, using monospace font\n5. A professional sign-off at the bottom",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a professional email drafting assistant. Your job is to take \na code summary and commented code, then draft a clean, professional \nHTML email that presents both in a readable, well-structured format.\n\nFollow these rules STRICTLY:\n- Output ONLY valid HTML — no explanations, no preamble, no markdown\n- Do not include <html>, <head>, or <body> tags — just the inner content\n- Use inline CSS only (email clients strip external/internal stylesheets)\n- Make it look clean and professional\n- Do NOT alter the summary content or the commented code in any way\n- Preserve all code formatting using <pre> and <code> tags\n- Use a neutral, professional tone in any text you write"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        368,
+        -64
+      ],
+      "id": "4e6b2a4e-43cd-45eb-a366-398cb8564b84",
+      "name": "Draft Email"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code Summarizer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code Commentor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Code Summarizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Code Commentor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Commentor": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Email": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "24be5b5d-2bff-4d27-9ea8-37126bdc2139",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "909fd30b82e611601cf25af18134ffbe6f7c811c262a545405d2070749b5ceec"
+  },
+  "id": "8GJy20xirwbtAIvY",
+  "tags": []
+}
