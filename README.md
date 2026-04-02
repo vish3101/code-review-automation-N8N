@@ -35,7 +35,7 @@ using Claude AI, and sends back a structured code review report
 ## How to Use
 
 1. Import `workflow.json` into your n8n instance
-2. Add your Anthropic API key in the HTTP Request headers
+2. Add your LLM API key in the HTTP Request headers
 3. Connect your Gmail account
 4. Send any email with code in the body to your connected Gmail
 5. You'll receive a full review within seconds
